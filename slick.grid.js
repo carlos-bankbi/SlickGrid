@@ -313,18 +313,8 @@ if (typeof Slick === "undefined") {
       treeColumns = new Slick.TreeColumns(columns);
       columns = treeColumns.extractColumns();
 
-      columnsById = {};
-      for (var i = 0; i < columns.length; i++) {
-        var m = columns[i] = $.extend({}, columnDefaults, columns[i]);
-        columnsById[m.id] = i;
-        if (m.minWidth && m.width < m.minWidth) {
-          m.width = m.minWidth;
-        }
-        if (m.maxWidth && m.width > m.maxWidth) {
-          m.width = m.maxWidth;
-        }
-      }
-
+      updateColumnProps();
+      
       // validate loaded JavaScript modules against requested options
       if (options.enableColumnReorder && !$.fn.sortable) {
         throw new Error("SlickGrid's 'enableColumnReorder = true' option requires jquery-ui.sortable module to be loaded");
@@ -625,6 +615,15 @@ if (typeof Slick === "undefined") {
       }
     }
 
+    function getPluginByName(name) {
+      for (var i = plugins.length; i >= 0; i--) {
+        if (plugins[i].pluginName === name) {
+          return plugins[i];
+        }
+      }
+      return undefined;
+    }
+
     function setSelectionModel(model) {
       if (selectionModel) {
         selectionModel.onSelectedRangesChanged.unsubscribe(handleSelectedRangesChanged);
@@ -644,8 +643,16 @@ if (typeof Slick === "undefined") {
       return selectionModel;
     }
 
-    function getCanvasNode() {
-      return $canvas[0];
+    function getCanvasNode(columnIdOrIdx, rowIndex) {
+      if (!columnIdOrIdx) { columnIdOrIdx = 0; }
+      if (!rowIndex) { rowIndex = 0; }
+      
+      var idx = (typeof columnIdOrIdx === "number" ? columnIdOrIdx : getColumnIndex(columnIdOrIdx));
+      
+      return (hasFrozenRows && rowIndex >= actualFrozenRow + (options.frozenBottom ? 0 : 1) )   
+          ?  ((hasFrozenColumns() && idx > options.frozenColumn) ? $canvasBottomR[0] : $canvasBottomL[0])
+          :  ((hasFrozenColumns() && idx > options.frozenColumn) ? $canvasTopR[0] : $canvasTopL[0])
+          ;
     }
 
     function getActiveCanvasNode(element) {
@@ -978,13 +985,19 @@ if (typeof Slick === "undefined") {
       }
     }
 
-    function getHeader() {
-      return $headers[0];
+    function getHeader(columnDef) {
+      if (!columnDef) {
+        return hasFrozenColumns() ? $headers : $headerL;
+      }
+      var idx = getColumnIndex(columnDef.id);
+      return hasFrozenColumns() ? ((idx <= options.frozenColumn) ? $headerL : $headerR) : $headerL;
     }
 
     function getHeaderColumn(columnIdOrIdx) {
       var idx = (typeof columnIdOrIdx === "number" ? columnIdOrIdx : getColumnIndex(columnIdOrIdx));
-      var $rtn = $headers.children().eq(idx);
+      var targetHeader = hasFrozenColumns() ? ((idx <= options.frozenColumn) ? $headerL : $headerR) : $headerL;
+      var targetIndex = hasFrozenColumns() ? ((idx <= options.frozenColumn) ? idx : idx - options.frozenColumn - 1) : idx;
+      var $rtn = targetHeader.children().eq(targetIndex);
       return $rtn && $rtn[0];
     }
 
@@ -2284,6 +2297,22 @@ if (typeof Slick === "undefined") {
       }
     }
 
+    function updateColumnProps() {
+      columnsById = {};
+      for (var i = 0; i < columns.length; i++) {
+        if (columns[i].width) { columns[i].widthRequest = columns[i].width; }
+        
+        var m = columns[i] = $.extend({}, columnDefaults, columns[i]);
+        columnsById[m.id] = i;
+        if (m.minWidth && m.width < m.minWidth) {
+          m.width = m.minWidth;
+        }
+        if (m.maxWidth && m.width > m.maxWidth) {
+          m.width = m.maxWidth;
+        }
+      }      
+    }
+    
     function setColumns(columnDefinitions) {
       var _treeColumns = new Slick.TreeColumns(columnDefinitions);
       if (_treeColumns.hasDepth()) {
@@ -2293,18 +2322,7 @@ if (typeof Slick === "undefined") {
         columns = columnDefinitions;
       }
 
-      columnsById = {};
-      for (var i = 0; i < columns.length; i++) {
-        var m = columns[i] = $.extend({}, columnDefaults, columns[i]);
-        columnsById[m.id] = i;
-        if (m.minWidth && m.width < m.minWidth) {
-          m.width = m.minWidth;
-        }
-        if (m.maxWidth && m.width > m.maxWidth) {
-          m.width = m.maxWidth;
-        }
-      }
-
+      updateColumnProps();
       updateColumnCaches();
 
       if (initialized) {
@@ -5182,7 +5200,7 @@ if (typeof Slick === "undefined") {
     // Public API
 
     $.extend(this, {
-      "slickGridVersion": "2.4.3",
+      "slickGridVersion": "2.4.5",
 
       // Events
       "onScroll": new Slick.Event(),
@@ -5227,6 +5245,7 @@ if (typeof Slick === "undefined") {
       // Methods
       "registerPlugin": registerPlugin,
       "unregisterPlugin": unregisterPlugin,
+      "getPluginByName": getPluginByName,
       "getColumns": getColumns,
       "setColumns": setColumns,
       "getColumnIndex": getColumnIndex,
@@ -5247,7 +5266,8 @@ if (typeof Slick === "undefined") {
       "setSelectedRows": setSelectedRows,
       "getContainerNode": getContainerNode,
       "updatePagingStatusFromView": updatePagingStatusFromView,
-
+      "applyFormatResultToCellNode": applyFormatResultToCellNode,
+      
       "render": render,
       "invalidate": invalidate,
       "invalidateRow": invalidateRow,
