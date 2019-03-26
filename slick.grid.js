@@ -3094,7 +3094,7 @@ if (typeof Slick === "undefined") {
         scrollTo(th - tempViewportH);
       }
 
-      if (h != oldH && options.autoHeight) {
+      if (Math.abs(h - oldH) > 0.1 && options.autoHeight) {
         resizeCanvas();
       }
 
