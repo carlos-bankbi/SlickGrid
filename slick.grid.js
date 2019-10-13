@@ -2683,8 +2683,8 @@ if (typeof Slick === "undefined") {
       stringArray.push("<div class='" + cellCss + (addlCssClasses ? ' ' + addlCssClasses : '') + "' " + toolTip + ">");
 
       // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
-      if (item) {
-        stringArray.push(Object.prototype.toString.call(formatterResult)  !== '[object Object]' ? formatterResult : formatterResult.text);
+        if (item) {
+            stringArray.push(formatterResult);
       }
 
       stringArray.push("</div>");
@@ -3378,7 +3378,25 @@ if (typeof Slick === "undefined") {
       var x = document.createElement("div"),
         xRight = document.createElement("div");
 
+      var innerHtml = "";
+      var objectList = [];
+      for (var i = 0; i < stringArrayL.length; i++) {
+          if (typeof stringArrayL[i] !== "string") {
+              objectList.push(stringArrayL[i]);
+              stringArrayL[i] = "<div class='slick-object-container'></div>";
+          }
+      }
+
       x.innerHTML = stringArrayL.join("");
+      var containersHtml = x.getElementsByClassName('slick-object-container');
+      for (var i = 0; i < objectList.length; i++) {
+          containersHtml[i].parentElement.append(objectList[i]);
+      }
+
+      for (var i = 0; i < objectList.length; i++) {
+          containersHtml[0].remove();
+      }
+
       xRight.innerHTML = stringArrayR.join("");
 
       for (var i = 0, ii = rows.length; i < ii; i++) {
