@@ -2683,8 +2683,8 @@ if (typeof Slick === "undefined") {
       stringArray.push("<div class='" + cellCss + (addlCssClasses ? ' ' + addlCssClasses : '') + "' " + toolTip + ">");
 
       // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
-      if (item) {
-        stringArray.push(Object.prototype.toString.call(formatterResult)  !== '[object Object]' ? formatterResult : formatterResult.text);
+        if (item) {
+            stringArray.push(formatterResult);
       }
 
       stringArray.push("</div>");
@@ -3378,8 +3378,43 @@ if (typeof Slick === "undefined") {
       var x = document.createElement("div"),
         xRight = document.createElement("div");
 
-      x.innerHTML = stringArrayL.join("");
-      xRight.innerHTML = stringArrayR.join("");
+        //insert objects into left side
+        var objectListL = [];
+        for (var i = 0; i < stringArrayL.length; i++) {
+            if (typeof stringArrayL[i] !== "string") {
+                objectListL.push(stringArrayL[i]);
+                stringArrayL[i] = "<div class='slick-object-container'></div>";
+            }
+        }
+
+        x.innerHTML = stringArrayL.join("");
+        var containersHtml = x.getElementsByClassName('slick-object-container');
+        for (var i = 0; i < objectListL.length; i++) {
+            containersHtml[i].parentElement.append(objectListL[i]);
+        }
+
+        for (var i = 0; i < objectListL.length; i++) {
+            containersHtml[0].remove();
+        }
+
+        //insert objects into right side
+        var objectListR = [];
+        for (var i = 0; i < stringArrayR.length; i++) {
+            if (typeof stringArrayR[i] !== "string") {
+                objectListR.push(stringArrayR[i]);
+                stringArrayR[i] = "<div class='slick-object-container'></div>";
+            }
+        }
+
+        xRight.innerHTML = stringArrayR.join("");
+        containersHtml = xRight.getElementsByClassName('slick-object-container');
+        for (var i = 0; i < objectListR.length; i++) {
+            containersHtml[i].parentElement.append(objectListR[i]);
+        }
+
+        for (var i = 0; i < objectListR.length; i++) {
+            containersHtml[0].remove();
+        }
 
       for (var i = 0, ii = rows.length; i < ii; i++) {
         if (( hasFrozenRows ) && ( rows[i] >= actualFrozenRow )) {
