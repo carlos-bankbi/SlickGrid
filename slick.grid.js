@@ -2884,6 +2884,7 @@ if (typeof Slick === "undefined") {
     function getViewportHeight() {
       if (options.autoHeight) {
         var fullHeight = $paneHeaderL.outerHeight();
+
         fullHeight += ( options.showHeaderRow ) ? options.headerRowHeight + getVBoxDelta($headerRowScroller) : 0;
         fullHeight += ( options.showFooterRow ) ? options.footerRowHeight + getVBoxDelta($footerRowScroller) : 0;
         fullHeight += (getCanvasWidth() > viewportW) ? scrollbarDimensions.height : 0;
@@ -2926,6 +2927,21 @@ if (typeof Slick === "undefined") {
       getViewportWidth();
       getViewportHeight();
 
+      $paneHeaderL.css('height', 'auto');
+        
+      let headerHeight = $paneHeaderL.height();
+
+      if (hasFrozenColumns()) {
+        $paneHeaderR.css('height', 'auto');
+
+        if ($paneHeaderR.height() > headerHeight) {
+            headerHeight = $paneHeaderR.height();
+
+            $paneHeaderL.css('height', headerHeight);
+            $paneHeaderR.css('height', headerHeight);
+        }
+      }
+
       // Account for Frozen Rows
       if (hasFrozenRows) {
         if (options.frozenBottom) {
@@ -2961,7 +2977,7 @@ if (typeof Slick === "undefined") {
       }
 
       $paneTopL.css({
-        'top': $paneHeaderL.height(), 'height': paneTopH
+        'top': headerHeight, 'height': paneTopH
       });
 
       var paneBottomTop = $paneTopL.position().top
@@ -2973,7 +2989,7 @@ if (typeof Slick === "undefined") {
 
       if (hasFrozenColumns()) {
         $paneTopR.css({
-          'top': $paneHeaderL.height(), 'height': paneTopH
+            'top': headerHeight, 'height': paneTopH
         });
 
         $viewportTopR.height(viewportTopH);
@@ -3026,6 +3042,23 @@ if (typeof Slick === "undefined") {
       if (options.forceFitColumns) {
         autosizeColumns();
       }
+
+        const $columnRowL = $paneHeaderL.find('.slick-header-columns');
+
+        $columnRowL.css('height', 'auto');
+        let columnRowHeight = $columnRowL.height();
+
+        if (hasFrozenColumns()) {
+            const $columnRowR = $paneHeaderR.find('.slick-header-columns');
+            $columnRowR.css('height', 'auto');
+
+            if ($columnRowR.height() > columnRowHeight) {
+                columnRowHeight = $columnRowR.height();
+
+                $columnRowL.css('height', columnRowHeight);
+                $columnRowR.css('height', columnRowHeight);
+            }
+        }    
 
       updateRowCount();
       handleScroll();
