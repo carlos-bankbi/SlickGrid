@@ -36,7 +36,7 @@
       dataView.setRefreshHints({
         isFilterUnchanged: true
       });
-      dataView.setPagingOptions({pageSize: n});
+      dataView.setPagingOptions({pageSize: n, totalRows: dataView.getLength()});
     }
 
     function gotoFirst() {
