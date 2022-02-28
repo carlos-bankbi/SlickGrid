@@ -3315,14 +3315,14 @@ if (typeof Slick === "undefined") {
       var x = document.createElement("div");
       var innerHtml = "";
       var objectList = [];
-      for (var i = 0; i < stringArrayL.length; i++) {
-        if (typeof stringArrayL[i] !== "string") {
-          objectList.push(stringArrayL[i]);
-          stringArrayL[i] = "<div class='slick-object-container'></div>";
+      for (var i = 0; i < stringArray.length; i++) {
+        if (typeof stringArray[i] !== "string") {
+          objectList.push(stringArray[i]);
+          stringArray[i] = "<div class='slick-object-container'></div>";
         }
       }
 
-      x.innerHTML = stringArrayL.join("");
+      x.innerHTML = stringArray.join("");
       var containersHtml = x.getElementsByClassName('slick-object-container');
       for (var i = 0; i < objectList.length; i++) {
         containersHtml[i].parentElement.append(objectList[i]);
