@@ -1220,6 +1220,11 @@ if (typeof Slick === "undefined") {
             .addClass(m.headerCssClass || "")
             .addClass(hasFrozenColumns() && i <= options.frozenColumn? 'frozen': '')
             .appendTo($headerTarget);
+	      
+	if (m.display === false) {
+          header = header.attr("hidden", "hidden");
+          m.width = 0;
+        }
 
         if (options.enableColumnReorder || m.sortable) {
           header
@@ -2659,6 +2664,10 @@ if (typeof Slick === "undefined") {
 
       if (row === activeRow && cell === activeCell && options.showCellSelection) {
         cellCss += (" active");
+      }
+	    
+      if (m.display === false) {
+          cellCss += (" hidden");
       }
 
       // TODO:  merge them together in the setter
